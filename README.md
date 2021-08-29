@@ -41,6 +41,7 @@ SLAM1.py is a code that uses live 2-D Lidar and initial, current and goal gps da
 * Then according to the current and goal gps coordinates, calculates their position wrt to the the start coordinates and places them in corresponding matrix cells having the same distance from the center cell.
 * It also takes live LIDAR data, changes its frame from current gps frame to start gps frame and plots fills the corresponding cell to plot obstacles.
 * The code then plots this matrix onto a matplotlib matshow map. Since it uses live data, it updates the map every second to provide us with a realtime map of its surroundings.  
+ 
  Example: On the Left is a gazebo simulation of an environment and on the right is the occupancy grid map constructed using SLAM1.py. The green dot(near 80, 60) is the start positiion, the yello-green dot (near 60, 45) is the current position and the yellow dot(near 25, 25) is the Goal. (x,y: reference x in the top scale, y in the left scale) 
  
  
