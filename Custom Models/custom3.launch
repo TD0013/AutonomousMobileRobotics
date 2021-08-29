@@ -1,0 +1,46 @@
+<launch>
+    <arg name="world_file"     default="YOUR_PATH_TO_A_WORLD_FILE"/>
+    <arg name="gui" default="true"/>
+    <arg name="initial_pose_x" default="0.0"/>
+    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_a" default="0"/>
+    <arg name="robot_name" default="A_DEFAULT_ROBOT_NAME"/>
+    <param name="/use_sim_time" value="true"/>
+
+        <!--  ******************** Gazebo ********************  -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="use_sim_time" value="true"/>
+        <arg name="debug" value="false"/>
+        <arg name="world_name" value="$(arg world_file)"/>
+        <arg name="gui" value="$(arg gui)"/>
+    </include>
+
+
+<!-- Set different initial poses to avoid collision when spawning the model -->
+<group ns="custom2">
+    <include file="$(find custom_models)spawncustom2.launch">
+        <arg name="initial_pose_x" value="0.0"/>
+        <arg name="robot_name" value="custom2"/>
+        <param name="robot_description" command="$(find custom_models)/custom2.urdf"/>
+        <param name="tf_prefix" value="custom2"></param>
+        <node name="my_stp" pkg="tf" type="static_transform_publisher" args="-1 0 0 0 0 0 map custom2/base_link 100"/>
+        <node name="my_jsp" pkg="joint_state_publisher" type="joint_state_publisher"/>
+        <node name="my_rsp" pkg="robot_state_publisher" type="state_publisher"/>
+    </include>  
+</group>
+
+<group ns="goalPole">
+    <include file="$(find custom_models)/spawngoalpole.launch">
+        <arg name="initial_pose_x" value="1.0"/>
+        <arg name="robot_name" value="goalPole"/>
+
+    </include>
+    <node name="my_stp" pkg="tf" type="static_transform_publisher" args="1 0 0 0 0 0 /map base_link 100"/>
+    <node name="my_jsp" pkg="joint_state_publisher" type="joint_state_publisher"/>
+    <node name="my_rsp" pkg="robot_state_publisher" type="state_publisher"/>
+
+</group>    
+
+
+
+</launch>

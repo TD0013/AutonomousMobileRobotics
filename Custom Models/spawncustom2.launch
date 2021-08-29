@@ -1,0 +1,15 @@
+<launch>
+
+    <arg name="initial_pose_x" default="0.0"/>
+    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_a" default="0"/>
+    <arg name="robot_name" default="custom2"/>
+
+    <!--  ******************** Robot Model ********************  -->
+    <param name="robot_description" textfile="$(find custom_models)/custom2.urdf" />
+
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_$(arg robot_name)" 
+        args="-x $(arg initial_pose_x) -y $(arg initial_pose_y) -Y $(arg initial_pose_a)
+        -unpause -urdf -param robot_description -model $(arg robot_name)" respawn="false">
+    </node>
+</launch>
