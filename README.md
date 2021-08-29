@@ -109,7 +109,7 @@ Example: The following video shows the code APF_turtlebot.py controlling a turtl
 
 Example:
 
-<img src ="https://user-images.githubusercontent.com/86218311/131248622-0113570f-a3d6-40a2-b9f1-b53f9e47b813.png"
+  <img src ="https://user-images.githubusercontent.com/86218311/131248622-0113570f-a3d6-40a2-b9f1-b53f9e47b813.png"
    width="300" >
 
 
