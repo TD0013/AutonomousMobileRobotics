@@ -46,9 +46,9 @@ SLAM1.py is a code that uses live 2-D Lidar and initial, current and goal gps da
  
  
    <img src ="https://user-images.githubusercontent.com/86218311/131244690-8e1d3e86-62f1-4296-b86b-7a82f648fc23.png"
-   width="300" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="350" alt="4-DOF Robot" >
    <img src ="https://user-images.githubusercontent.com/86218311/131244703-6ef760c5-3cf6-4e61-a7b2-06609ec68dde.png"
-   width="400" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="400" alt="4-DOF Robot" >
 
 ###### TeleOp.py
 TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs and accociates:
@@ -58,7 +58,13 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
  d--> twist.angular.z -= 0.1 (increases the rightward turn by 0.1)
  " " --> twist() (Stops the robot)
 ## Path Planning
-* navigation.py
+###### navigation.py
+* Navigation.py is a code that takes the current and goal gps coordinates and tf2 and outputs a heading and a velocity based on the difference between the two coordinates.
+* It takes the frame transformation data (custom2/tf2) into account so that the heading that is calculated by the gps coordinates, and is hence in the global frame, is converted to appropriate custom2 frame and output as twist velocities. 
+
+
+   ![navigation py gif](https://user-images.githubusercontent.com/86218311/131245455-02829c1a-c334-4739-b288-1bfc501b7f0d.gif)
+
 
 ## Obstacle Avoidance 
 * APF_Turtlebot.py
