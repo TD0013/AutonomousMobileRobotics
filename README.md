@@ -14,21 +14,21 @@ Custom Models contains the models I made for testing out various algorithms usin
 Custom1.urdf is a basic robot with four wheels and a lidar sensor plugin that I initially created to get familiar with urdf and gazebo models.
  
    <img src ="https://user-images.githubusercontent.com/86218311/131243211-8ee8b566-aa4f-4d89-99d7-6a2558d989bc.png"
-   width="320" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="320"  style="horizontal-align:middle">
 
 ##### Custom2.urdf
 Custom2.urdf is a modified [Pioneer3at](https://github.com/MobileRobots/amr-ros-config), equipped with wheel actuators, a GPS sensor plugin, an imu sensor plugin, a 2-D Lidar plugin and a Kinect sensor plugin.
 
   <img src ="https://user-images.githubusercontent.com/86218311/131243394-9ef630c6-9d6a-475b-bb88-c2cd41af42b6.png"
-   width="320" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="320"  style="horizontal-align:middle">
 
 ##### Custom3.launch
 Custom3.launch uses the Custom2.urdf and goalpole.urdf to launch the rover model and a goal pole, both having their GPS sensors. This is so that we can try and implement path planning algorithms as we have both the rover's coordinates(/GPS/fix) and the goal coordinates(/gpsGoal/fix).
   
   <img src ="https://user-images.githubusercontent.com/86218311/131243519-266f2711-2ce6-4ef0-a9b3-4fa4bd1f469c.png"
-   width="320" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="320"  style="horizontal-align:middle">
   <img src ="https://user-images.githubusercontent.com/86218311/131243582-1937702a-0d40-4807-8715-6921181fdad1.png"
-   width="250" alt="4-DOF Robot" style="horizontal-align:middle">
+   width="250"  style="horizontal-align:middle">
   
 
 ## SLAM
@@ -46,9 +46,9 @@ SLAM1.py is a code that uses live 2-D Lidar and initial, current and goal GPS da
  
  
    <img src ="https://user-images.githubusercontent.com/86218311/131244690-8e1d3e86-62f1-4296-b86b-7a82f648fc23.png"
-   width="350" alt="4-DOF Robot" >
+   width="350"  >
    <img src ="https://user-images.githubusercontent.com/86218311/131244703-6ef760c5-3cf6-4e61-a7b2-06609ec68dde.png"
-   width="400" alt="4-DOF Robot" >
+   width="400"  >
 
 ##### TeleOp.py
 TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs and accociates:
@@ -68,7 +68,7 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
 * Navigation.py is a code that takes the current and goal GPS coordinates and tf2 and outputs a heading and a velocity based on the difference between the two coordinates.
 * It takes the frame transformation data (custom2/tf2) into account so that the heading calculated by the GPS coordinates, and is hence in the global frame, is converted to appropriate custom2 frame and output as twist velocities. 
 
-
+ 
    ![navigation py gif](https://user-images.githubusercontent.com/86218311/131245455-02829c1a-c334-4739-b288-1bfc501b7f0d.gif)
 
 
@@ -94,7 +94,24 @@ Example: The following video shows the code APF_turtlebot.py controlling a turtl
 
 ## Computer Vision
 ##### LineFollower.py
-* 
-##### AlternateLineFollower.py
+* LineFollower.py contains the code for a [turtlebot3](https://github.com/ROBOTIS-GIT/turtlebot3) burger that enables it to follow a line.
+* The code takes input form a comera mounted on the turtlebot and uses OpenCV to find and follow a line.
+* The video from the camera is first masked so that it only looks for a line in the region of interest.
+* Once it has a region of interest, it thenn processes using thresholds for finding a yellow line.
+* Then it marks the found yellow line in the video and using momnets, finds the center of the line.
+* Finally, it publishes twist velocities based on the centre of the moments to follow the line
+  Example:
+  
+  ![LineFollower](https://user-images.githubusercontent.com/86218311/131248464-7c60d5ba-b2f4-4edd-9da6-4907676e4d7b.gif)
+
+##### alternateLineFollower.py
+* Alternate Line Follower works the same as the LineFollower.py but instead of using thresholds for detecting a yellow line, uses canny edge detection for detecting general lines.
+
+Example:
+
+<img src ="https://user-images.githubusercontent.com/86218311/131248622-0113570f-a3d6-40a2-b9f1-b53f9e47b813.png"
+   width="300" >
+
+
 
 
