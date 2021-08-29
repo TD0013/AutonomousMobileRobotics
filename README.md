@@ -76,6 +76,7 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
 * These forces are summed up to give a net force in the x and y direction and published as twist velocities
 Example: The following video shows the code APF_turtlebot.py controlling a turtlebot3 waffle pi in a gazebo house environment.
  The model can bee seen changing its direction to avoid walls and obstacles and even reversing when it sees no way forward.
+  
   ![APF_Turtlebot](https://user-images.githubusercontent.com/86218311/131246478-46ef914e-8886-4fd1-995b-e45561897446.gif)
 
 ###### ObstacleAvoidance.py
