@@ -57,6 +57,7 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
  a--> twist.angular.z += 0.1 (increases the leftward turn by 0.1)
  d--> twist.angular.z -= 0.1 (increases the rightward turn by 0.1)
  " " --> twist() (Stops the robot)
+ 
 ## Path Planning
 ###### navigation.py
 * Navigation.py is a code that takes the current and goal gps coordinates and tf2 and outputs a heading and a velocity based on the difference between the two coordinates.
@@ -67,8 +68,23 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
 
 
 ## Obstacle Avoidance 
-* APF_Turtlebot.py
-* ObstacleAvoidance.py
+###### APF_Turtlebot.py
+* APF_Turtlebot is a code that implements a basic Artificial Potentail Field Alforithm for avoiding obstacles that I applied on a [turtlebot3 waffle pi](https://github.com/ROBOTIS-GIT/turtlebot3).
+* The Turtlebot has a 2-D lidar mounted on it and uses this lidar ot c=scan its surroundings and returns and array with 360 distance values. 
+* The code splits the lidar scan distance as the x and y coordinates for each point in the region 60 to -60 degrees and stores these values.
+* Based on this x and y distance from each point, a force that is inversely proportional to the x/y distance is calculated. 
+* These forces are summed up to give a net force in the x and y direction and published as twist velocities
+Example: The following video shows the code APF_turtlebot.py controlling a turtlebot3 waffle pi in a gazebo house environment.
+ The model can bee seen changing its direction to avoid walls and obstacles and even reversing when it sees no way forward.
+  ![APF_Turtlebot](https://user-images.githubusercontent.com/86218311/131246478-46ef914e-8886-4fd1-995b-e45561897446.gif)
+
+###### ObstacleAvoidance.py
+* An initial implementation of an bug-type obstacle avoidance algorithm.
+* It uses lidar data to scan its front for obstacles.
+* If it is about to collide with an obstacle, it stops and turns left or right(whichever is a free space), and then resumes its motion.
+   
+   ![ObstacleAvoidance](https://user-images.githubusercontent.com/86218311/131246763-08dc0e6a-b22a-4d0f-b7b2-ce724d19590e.gif)
+
 
 ## Computer Vision
 * LineFollower.py
