@@ -79,6 +79,7 @@ TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs an
 * The code splits the lidar scan distance as the x and y coordinates for each point in the region 60 to -60 degrees and stores these values.
 * Based on this x and y distance from each point, a force inversely proportional to the x/y distance is calculated. 
 * These forces are summed up to give a net force in the x and y direction and published as twist velocities
+
 Example: The following video shows the code APF_turtlebot.py controlling a turtlebot3 waffle pi in a gazebo house environment.
  The model can be seen changing its direction to avoid walls and obstacles and even reversing when it sees no way forward.
   
