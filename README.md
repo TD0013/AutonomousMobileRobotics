@@ -34,6 +34,18 @@ Custom3.launch uses the Custom2.urdf and goalpole.urdf to launch the rover model
 ## SLAM
 SLAM contains the codes I made for mapping or SLAM
 
+##### localMap.py
+localMap.py is a code for building a realtime, constantly updating occupancy grid map of the robot in its surroundings and vizualizing it on rviz.
+* It takes in 2-D Lidar data and depending on the distance from the farthest obstacle and the given resoultion, defines a matrix of relevant leangth.
+* Using the Lidar data, it marks obstacles on the matrix having the value 100 and adjacent cells having value 50.
+* When all obstacles have been marked, it converts the matrix in the form of ROS recognisable nav_msgs/OccupancyGrd format and publishes the map data.
+* This data can be vizualized using Rviz.
+
+ Example: On the right is a gazbo simulation of the custom2 model in a gazebo worls and on the left is the vizualization of the Lidar, pointCloud data and the Occupancy Grid map.
+  
+  ![Updating Map](https://user-images.githubusercontent.com/86218311/132450651-a92a06a3-edc4-4f1b-b19b-43786a78b09b.gif)
+
+ 
 ##### SLAM1.py
 SLAM1.py is a code that uses live 2-D Lidar and initial, current and goal GPS data to output an occupancy grid map.
  * Depending on the GPS coordinates of the rover and the goal, it constructs a matrix that is four times the distance between them. This method makes the matrix size dynamic and reduces unnecessary computational complexity.
@@ -50,19 +62,7 @@ SLAM1.py is a code that uses live 2-D Lidar and initial, current and goal GPS da
    <img src ="https://user-images.githubusercontent.com/86218311/131244703-6ef760c5-3cf6-4e61-a7b2-06609ec68dde.png"
    width="400"  >
 
-##### TeleOp.py
-TeleOp.py is a code for Teleoperation of a rover. It captures keyboard inputs and accociates:
 
- w --> twist.linear.x += 0.1 (increases forward velocity by 0.1)
-
- s--> twist.linear.x -= 0.1 (decreases forward velocity by 0.1)
- 
- a--> twist.angular.z += 0.1 (increases the leftward turn by 0.1)
- 
- d--> twist.angular.z -= 0.1 (increases the rightward turn by 0.1)
- 
- " " --> twist() (Stops the robot)
- 
 ## Path Planning
 ##### navigation.py
 * Navigation.py is a code that takes the current and goal GPS coordinates and tf2 and outputs a heading and a velocity based on the difference between the two coordinates.
