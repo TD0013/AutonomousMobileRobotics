@@ -34,16 +34,37 @@ Custom3.launch uses the Custom2.urdf and goalpole.urdf to launch the rover model
 ## SLAM
 SLAM contains the codes I made for mapping or SLAM
 
+##### globalMap.py
+globalMap.py is a code for that uses the data from localMap.py to build and store a map of its surroundings.
+* It takes in localMap and odom data to plot the data from the localMap in a global frame.
+* It constructs a blank map of dimensions 1000x1000 with resolution same as the localMap.
+* Then according to the localMap, it populates the map, converts the map into ROS recognisable nav_msgs/OccupancyGrid and publishes the map and stores htis map as old_map.
+* When the next localMap scan comes in, the loop takes the data from the old_map and localMap and takes the weighted average to get the value(0-100) of a cell.
+* Then the map is again canverted to OccupancyGrid, published and stored as old_map.
+* This data can be vizualized using Rviz.
+
+Drawbacks:
+* Due to the inaccuracy in odom data, the map can have some inaccuracy.
+
+ Example: On the left is a gazbo simulation of the custom2 model in a gazebo worls and on the right is the vizualization of the Lidar, pointCloud data and the Occupancy Grid map.
+ 
+ ![globalMap](https://user-images.githubusercontent.com/86218311/132984227-25d49ade-228b-4569-8321-0af28076d747.gif)
+
+
 ##### localMap.py
 localMap.py is a code for building a realtime, constantly updating occupancy grid map of the robot in its surroundings and vizualizing it on rviz.
-* It takes in 2-D Lidar data and depending on the distance from the farthest obstacle and the given resoultion, defines a matrix of relevant leangth.
-* Using the Lidar data, it marks obstacles on the matrix having the value 100 and adjacent cells having value 50.
+* It takes in 2-D Lidar data and depending on the distance from the farthest obstacle and the given resoultion, defines a matrix of relevant leangth and given resolution.
+* Using the Lidar data, it marks obstacles on the matrix having the value '100' and all 8 adjacent cells having value '50'.
+* Then it takes the assigns a value of '0' to all the cells between the rover and the detected obstacle.
 * When all obstacles have been marked, it converts the matrix in the form of ROS recognisable nav_msgs/OccupancyGrd format and publishes the map data.
 * This data can be vizualized using Rviz.
 
- Example: On the right is a gazbo simulation of the custom2 model in a gazebo worls and on the left is the vizualization of the Lidar, pointCloud data and the Occupancy Grid map.
-  
-  ![Updating Map](https://user-images.githubusercontent.com/86218311/132450651-a92a06a3-edc4-4f1b-b19b-43786a78b09b.gif)
+Drawbacks:
+* The algorithm that assigns a value of '0' to free cells publishes some garbage values and has some gaps if the obstacles are far away.
+
+ Example: On the left is a gazbo simulation of the custom2 model in a gazebo worls and on the right is the vizualization of the Occupancy Grid map.
+ 
+ ![localMap](https://user-images.githubusercontent.com/86218311/132983900-f8e347ef-754c-4387-b25f-d64422b8a8b0.gif)
 
  
 ##### SLAM1.py
