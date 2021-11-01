@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import rospy
+import math
 from sensor_msgs.msg import NavSatFix
 
 from nav_msgs.msg import OccupancyGrid
@@ -32,8 +33,8 @@ class GPS:
         print("GPS init")
         self.i=1
         self.j=1
-        rospy.Subscriber("/gps/fix", NavSatFix, self.PosCallback)
-        rospy.Subscriber ('/odom', Odometry, self.get_rotation)
+        #rospy.Subscriber("/gps/fix", NavSatFix, self.PosCallback)
+        rospy.Subscriber ('/ros0xrobot/odom', Odometry, self.get_rotation)
 
 
         rospy.sleep(1)
@@ -73,6 +74,7 @@ class Map:
         print("Map init")
         rospy.Subscriber('/localMap', OccupancyGrid, self.map_callback)
         self.old_map = [[-1 for z in range(0, width+1)] for z in range(0, height+1)]
+        self.count = [[1 for z in range(0, width+1)] for z in range(0, height+1)]
         rospy.sleep(2)
 
 
@@ -83,50 +85,48 @@ class Map:
         self.localHeight = msg.info.width
         self.localWidth = msg.info.height
 
-        
-
-        
 
     def obstacleMap(self, height, width, current, gps):
 
         cells = int(1/self.res)
         localHeight =  self.localHeight
         localWidth = self.localWidth
+	local_map = self.local_map
 
-        
+	THETA = 0;
+	TRANSFORMATION_J = -int(gps.odometry_p.x*cells)
+	TRANSFORMATION_I = -int(gps.odometry_p.y*cells)
 
-        self.obstacle_map = [[-1 for z in range(0, width+1)] for z in range(0, height+1)]
-        self.count = [[1 for z in range(0, width+1)] for z in range(0, height+1)]
+	self.obstacle_map = [[-1 for z in range(0, width+1)] for z in range(0, height+1)]
+
 
         for j in range(0, localHeight):
             for i in range (0, localWidth):
-                J = j+current[0]-localHeight/2-int(gps.odometry_p.x*cells)
-                I = i+current[1]-localWidth/2-int(gps.odometry_p.y*cells)
+                J = int(i*math.sin(THETA)+j*math.cos(THETA))+current[0]-localHeight/2 + TRANSFORMATION_J
+                I = int(i*math.cos(THETA)-j*math.sin(THETA))+current[1]-localWidth/2 +TRANSFORMATION_I
 
 
                 #print(j,i, J, I)
 
                 
 
-                if self.local_map[j][i] == -1:
+                if local_map[j][i] == -1:
                     self.obstacle_map[J][I] = self.old_map[J][I]
             
                 else:
                     
-                    self.obstacle_map[J][I] = int(((self.count[J][I])*self.local_map[j][i] + max(0,self.old_map[J][I]))/(self.count[J][I]+1))
+                    self.obstacle_map[J][I] = int((local_map[j][i] + max(0,(self.count[J][I]-1)*self.old_map[J][I]))/(self.count[J][I]))
                 
                     self.count[J][I] += 1
 
-                
-
-        self.old_map[:]
+        
         self.old_map = self.obstacle_map
 
         self.matrixTOarray(height, width)
 
         return self.global_map
 
-    def arrayTOmatrix(self,graph):
+    def arrayTOmatrix(self):
         self.local_map = [[-1 for z in range(0, self.localWidth+1)] for z in range(0, self.localHeight+1)]
         i = self.localHeight*self.localWidth
         
@@ -156,12 +156,12 @@ class Map:
 
         
 def loop():
-    graph=Graph()
+    #graph=Graph()
     globalMap = OccupancyGrid()
     gps = GPS()
     
-    HEIGHT = 1000
-    WIDTH = 1000
+    HEIGHT = 400
+    WIDTH = 400
 
     map = Map(HEIGHT, WIDTH)
 
@@ -181,8 +181,8 @@ def loop():
 
         
             #Goalx,Goaly, Posx, Posy = gps.heading()
-        map.arrayTOmatrix(graph)
-            
+        map.arrayTOmatrix()
+
         global_map = map.obstacleMap(HEIGHT, WIDTH, CENTER, gps)
         
 
@@ -209,7 +209,7 @@ def loop():
         test = rospy.Publisher("/globalMap", OccupancyGrid, queue_size=1)
         test.publish(globalMap)
             
-        print("published Map")
+        #print("published Map")
                 
         #rospy.sleep(0.001)
 
