@@ -118,6 +118,10 @@ class Map:
                     self.obstacle_map[J][I] = int((local_map[j][i] + max(0,(self.count[J][I]-1)*self.old_map[J][I]))/(self.count[J][I]))
                 
                     self.count[J][I] += 1
+		#if(J==124 and I ==220):
+			#print(J,I,self.count[J][I],  local_map[j][i], self.obstacle_map[J][I], self.old_map[J][I])
+
+                
 
         
         self.old_map = self.obstacle_map
@@ -218,5 +222,4 @@ def loop():
 if __name__ == '__main__':
     rospy.init_node("globalMap")
     loop()
-
 
