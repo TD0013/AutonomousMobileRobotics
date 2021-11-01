@@ -27,76 +27,98 @@ import matplotlib.pyplot as plt
 class Map:
     def __init__(self):
         print("Map init")
+        
+        self.temp_h =0
+	self.temp_w =0
         rospy.Subscriber('/scan', LaserScan, self.scan_callback)
         rospy.sleep(1)
 
     def scan_callback(self,msg):
-        
-        n = 360 #number of entries
-        self.Range = [0]*n
-        for i in range(-(n-1)/2, (n+1)/2):
-            #print(i)
-            
-            if i > 0 or i == 0:
-                if msg.ranges[i] == float('inf'):
-                    self.Range[i] = 30
-                else: 
-                    self.Range[i] = msg.ranges[i]
-            else:
-                if msg.ranges[i] == float('inf'):
-                    self.Range[i] = 30  
-                else: 
-                    self.Range[i] = msg.ranges[360+i]
+
+	#print("angle_min",msg.angle_min)
+	#print("angle_max",msg.angle_max)
+	#print("angle_increment",msg.angle_increment)
+	#print("time_increment",msg.time_increment)
+	#print("scan_time",msg.scan_time)
+	#print("range_min",msg.range_min)
+	#print("range_max",msg.range_max)
+	#print("range_max",len(msg.ranges))
+
+	self.ANGLE_MIN = int(round(msg.angle_min*180/math.pi))
+	self.ANGLE_MAX = int(round(msg.angle_max*180/math.pi))
+	self.ANGLE_TOT = self.ANGLE_MAX-self.ANGLE_MIN
+	self.ANGLE_INC = msg.angle_increment
+	N = len(msg.ranges)
+
+	self.N_MIN = int(N*(float(self.ANGLE_MIN)/float(self.ANGLE_TOT)))
+	self.N_MAX = int(N*(float(self.ANGLE_MAX)/float(self.ANGLE_TOT)))
+	
+        #print(self.ANGLE_MIN ,self.ANGLE_MAX, self.ANGLE_TOT, self.N_MIN, self.N_MAX)
+         #number of entries
+	self.Range =[0]*N 
+		
+	for i in range(0,N):
+		if(np.isnan(msg.ranges[i])):
+			self.Range[i+self.N_MIN] = msg.range_max
+			#print(i+self.N_MIN, self.Range[i+self.N_MIN])
+		else:
+			self.Range[i+self.N_MIN] = msg.ranges[i]
+		
+		
+
+			
             
 
 
     def PlotData(self): 
+	
     
     
         self.x = [0]*len(self.Range)
         self.y = [0]*len(self.Range)
         
-        for i in range(-(len(self.Range)-1)/2, (len(self.Range)+1)/2):
-            self.x[i] = -(self.Range[i]*np.sin(i*np.pi/180))
+        for i in range(self.N_MIN, self.N_MAX):
+            self.x[i] = -(self.Range[i]*np.sin(i*self.ANGLE_INC))
     
 
-            self.y[i] = -(self.Range[i]*np.cos(i*np.pi/180))
+            self.y[i] = -(self.Range[i]*np.cos(i*self.ANGLE_INC))
 
 
             
-            
+        return self.x,self.y
             #print (i, self.y[i], self.x[i])
 
             
             
-        self.x[0] = 0 
+        #self.x[0] = 0 
 
 
-    def ObstacleMap(self, res, graph):
+    def ObstacleMap(self, res):
 
-
+	RANGE = self.Range
         self.PlotData()
 
         cells = 1/res
-        height = int((abs(int(max(self.y)) * 2)+10) * cells)
-        width = int((abs(int(max(self.x)) * 2) +10) * cells)
+        self.temp_h = max(abs(max(self.y)), abs(min(self.y)), self.temp_h)
+        height = int(self.temp_h*2*cells) +10
+        self.temp_w = max(abs(max(self.x)), abs(min(self.x)), self.temp_w)
+        width = int(self.temp_w*2*cells) +10
+
         current = [height/2, width/2]
 
-        #print(height, width, current)
+        #print(min(self.y), height, width, current)
         
         self.obstacle_map = [[-1 for z in range(0, width+1)] for z in range(0, height+1)]
        
         
 
-        for i in range(-(len(self.Range)-1)/2, (len(self.Range)+1)/2):
+        for i in range(self.N_MIN, self.N_MAX):
             #print(i, int(self.y[i]+current[0]),int(self.x[i]+int(current[1])))
         
 
             #obstacle cell
             self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))] = 100
             
-            
-            #nearby cells
             self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))], 50)
             self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1], 50)
             self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1], 50)
@@ -105,28 +127,12 @@ class Map:
             self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1], 50)
             self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1], 50)
             self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1], 50)
-
-
-            #print(int(self.y[i]*cells+current[0]), int(self.x[i]*cells+int(current[1])))
-
-            #print(i, int(self.x[i]*cells+current[1]),self.y[i]*cells+current[0])
-            #assign unoccupied grid value
-            #m = (self.y[i]- current[0])/()
-            for x in range(min(int(current[1]), int(self.x[i]*cells+current[1])), max(int(current[1]), int(self.x[i]*cells+current[1]))):
-                y = (((self.y[i])*x)+(self.x[i])*current[0]-self.y[i]*current[1])/(self.x[i])
-
-                #print(x,y)
-
-                self.obstacle_map[int(y)][int(x)] = max(self.obstacle_map[int(y)][int(x)], 0)
-
-            for y in range(min(int(current[0]), int(self.y[i]*cells+current[0])), max(int(current[0]), int(self.y[i]*cells+current[0]))):
-                x = (((self.x[i])*y)+(-self.x[i])*current[0]+self.y[i]*current[1])/(self.y[i])
-
-                #print(x,y)
-
-                self.obstacle_map[int(y)][int(x)] = max(self.obstacle_map[int(y)][int(x)], 0)
-
-
+            
+            for r in range(0, int(round(cells*RANGE[i]))):
+            	#print(i, r)
+            	tempx = -(r*np.sin(i*self.ANGLE_INC))
+            	tempy = -(r*np.cos(i*self.ANGLE_INC))
+            	self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])] = max(self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])], 0)
 
             if rospy.is_shutdown():
                 print("break")
@@ -146,26 +152,6 @@ class Map:
                 self.local_map[i] = int(self.obstacle_map[b][a])
                 
 
-class GPS:
-    def __init__(self):
-        print("GPS init")
-        self.i=1
-        self.j=1
-        rospy.Subscriber ('/odom', Odometry, self.get_rotation)
-
-
-        rospy.sleep(1)
-
-   
-    def get_rotation (self,msg):
-        self.odometry_p = msg.pose.pose.position
-        orientation_q = msg.pose.pose.orientation
-        orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
-        (self.roll, self.pitch, self.yaw) = euler_from_quaternion(orientation_list)
-        if self.j ==1:
-            self.startx = msg.pose.pose.orientation.x
-            self.starty = msg.pose.pose.orientation.y
-            self.j =0
 
 class Graph:
     def __init__(self):
@@ -188,11 +174,15 @@ class Graph:
         self.scat1 = self.ax2.matshow(map)
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
+    def plotObs(self, x,y):
+    	self.scat1 = self.ax.scatter(x, y)
+    	self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
 def loop():
-        gps = GPS
+        
         localMap = OccupancyGrid()
-        graph = Graph()
+        #graph = Graph()
         map = Map()
         while not rospy.is_shutdown():
             
@@ -200,9 +190,10 @@ def loop():
             resolution = 0.05
             #Goalx,Goaly, Posx, Posy = gps.heading()
             
-            
+            #(x,y) = map.PlotData()
+            #graph.plotObs(x, y)
 
-            l_map, height, width, current = map.ObstacleMap(resolution, graph)
+            l_map, height, width, current = map.ObstacleMap(resolution)
 
             localMap.header.frame_id = "base_link"
             localMap.info.height = width
