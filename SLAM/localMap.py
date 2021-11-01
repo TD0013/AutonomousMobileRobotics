@@ -43,7 +43,7 @@ class Map:
 	#print("range_min",msg.range_min)
 	#print("range_max",msg.range_max)
 	#print("range_max",len(msg.ranges))
-
+	self.RANGE_MAX = msg.range_max
 	self.ANGLE_MIN = int(round(msg.angle_min*180/math.pi))
 	self.ANGLE_MAX = int(round(msg.angle_max*180/math.pi))
 	self.ANGLE_TOT = self.ANGLE_MAX-self.ANGLE_MIN
@@ -59,7 +59,7 @@ class Map:
 		
 	for i in range(0,N):
 		if(np.isnan(msg.ranges[i])):
-			self.Range[i+self.N_MIN] = msg.range_max
+			self.Range[i+self.N_MIN] = -1
 			#print(i+self.N_MIN, self.Range[i+self.N_MIN])
 		else:
 			self.Range[i+self.N_MIN] = msg.ranges[i]
@@ -78,10 +78,11 @@ class Map:
         self.y = [0]*len(self.Range)
         
         for i in range(self.N_MIN, self.N_MAX):
-            self.x[i] = -(self.Range[i]*np.sin(i*self.ANGLE_INC))
-    
+		if(self.Range[i]!=-1):
+		    self.x[i] = -(self.Range[i]*np.sin(i*self.ANGLE_INC))
+	    
 
-            self.y[i] = -(self.Range[i]*np.cos(i*self.ANGLE_INC))
+		    self.y[i] = -(self.Range[i]*np.cos(i*self.ANGLE_INC))
 
 
             
@@ -99,9 +100,9 @@ class Map:
         self.PlotData()
 
         cells = 1/res
-        self.temp_h = max(abs(max(self.y)), abs(min(self.y)), self.temp_h)
+        self.temp_h = self.RANGE_MAX
         height = int(self.temp_h*2*cells) +10
-        self.temp_w = max(abs(max(self.x)), abs(min(self.x)), self.temp_w)
+        self.temp_w = self.RANGE_MAX
         width = int(self.temp_w*2*cells) +10
 
         current = [height/2, width/2]
@@ -109,34 +110,39 @@ class Map:
         #print(min(self.y), height, width, current)
         
         self.obstacle_map = [[-1 for z in range(0, width+1)] for z in range(0, height+1)]
-       
+       	
         
 
         for i in range(self.N_MIN, self.N_MAX):
             #print(i, int(self.y[i]+current[0]),int(self.x[i]+int(current[1])))
-        
+        	if(RANGE[i] ==-1):
+			for r in range(0, int(self.RANGE_MAX*cells)):
+			    	#print(i, r)
+			    	tempx = -(r*np.sin(i*self.ANGLE_INC))
+			    	tempy = -(r*np.cos(i*self.ANGLE_INC))
+			    	self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])] = max(self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])], 0)
+		else:
+		    #obstacle cell
+		    self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))] = 100
+		    
+		    self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))+1], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1], 50)
+		    self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1], 50)
+		    
+		    for r in range(0, int(round(cells*RANGE[i]))):
+		    	#print(i, r)
+		    	tempx = -(r*np.sin(i*self.ANGLE_INC))
+		    	tempy = -(r*np.cos(i*self.ANGLE_INC))
+		    	self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])] = max(self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])], 0)
 
-            #obstacle cell
-            self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))] = 100
-            
-            self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))+1], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))+1], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))+1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))+1], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])-1][int(self.x[i]*cells+(current[1]))-1], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])][int(self.x[i]*cells+(current[1]))-1], 50)
-            self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1] = max(self.obstacle_map[int(self.y[i]*cells+current[0])+1][int(self.x[i]*cells+(current[1]))-1], 50)
-            
-            for r in range(0, int(round(cells*RANGE[i]))):
-            	#print(i, r)
-            	tempx = -(r*np.sin(i*self.ANGLE_INC))
-            	tempy = -(r*np.cos(i*self.ANGLE_INC))
-            	self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])] = max(self.obstacle_map[int(tempy+current[0])][int(tempx+current[1])], 0)
-
-            if rospy.is_shutdown():
-                print("break")
-                break
+		if rospy.is_shutdown():
+		        print("break")
+		        break
         self.matrixTOarray(height,width)
         #graph.updateMap(self.obstacle_map)
         return self.local_map, height, width, current 
